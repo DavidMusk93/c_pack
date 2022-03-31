@@ -14,6 +14,7 @@ link_directories(${OPENSSL_DIR})
 
 add_executable(decrypt codec.c misc.c)
 target_link_libraries(decrypt crypto)
+set_target_properties(decrypt PROPERTIES COMPILE_DEFINITIONS "TEST_CODEC=1")
 
 add_executable(${PROJECT_NAME} license.c misc.c io.c codec.c)
 target_link_libraries(${PROJECT_NAME} crypto)
