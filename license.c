@@ -64,7 +64,7 @@ enum{
 #undef __field_offset
 };
 
-struct __packed st_license_t{
+struct __packed license{
     i16 ver;
     i8 name[FIELDLEN_NAME];
     i32 nodes;
@@ -96,7 +96,7 @@ MAIN_EX(argc,argv){
     if(fd==-1){
         return 2;
     }
-    struct st_license_t li;
+    struct license li;
     char buf[BUFLEN];
     int nr;
     nr=(int)read(fd,buf,sizeof buf);
@@ -137,7 +137,7 @@ MAIN_EX(argc,argv){
                 FIELDOFFSET_TOTAL
                 );
     }
-    LOGINFO("sizeof(struct st_license_t)=%ld",sizeof(struct st_license_t));
+    LOGINFO("sizeof(struct license)=%ld",sizeof(struct license));
     if(li.expire==NEVEREXPIRE)
         return 0;
     li.expire=NEVEREXPIRE;

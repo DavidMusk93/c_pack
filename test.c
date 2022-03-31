@@ -1,12 +1,12 @@
 #include "macro.h"
 #include "log.h"
 
-struct st_foo_t{
+struct foo{
     int x;
     char y[12];
 };
 
-struct __packed st_bar_t{
+struct __packed bar{
     int x;
     double y;
     union{
@@ -23,6 +23,6 @@ struct __packed st_bar_t{
 };
 
 MAIN(){
-    struct st_foo_t o;
-    LOGINFO("%ld,%ld,%ld",sizeof(o.x),sizeof(o.y)/*no decay*/,sizeof(struct st_bar_t));
+    struct foo o;
+    LOGINFO("%ld,%ld,%ld",sizeof(o.x),sizeof(o.y)/*no decay*/,sizeof(struct bar));
 }
