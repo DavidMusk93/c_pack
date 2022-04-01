@@ -22,7 +22,15 @@ struct __packed bar{
     };
 };
 
+enum{
+    ENUM_A=-1,
+    ENUM_B,
+    ENUM_C=2,
+    ENUM_D,
+};
+
 MAIN(){
     struct foo o;
     LOGINFO("%ld,%ld,%ld",sizeof(o.x),sizeof(o.y)/*no decay*/,sizeof(struct bar));
+    LOGINFO("%d,%d,%d,%d",ENUM_A,ENUM_B,ENUM_C,ENUM_D);
 }

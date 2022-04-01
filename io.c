@@ -2,7 +2,7 @@
 
 #include <string.h>
 
-#define UNPACKER struct st_unpacker_t
+#define UNPACKER struct unpacker
 
 static bool unpack(UNPACKER*self,void*p,int len){
     if(self->s+len<=self->e){

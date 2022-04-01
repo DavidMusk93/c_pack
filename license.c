@@ -64,6 +64,35 @@ enum{
 #undef __field_offset
 };
 
+enum{
+    MODULE_MIN=-1,
+    MODULE_LOCK=0,
+    MODULE_DDL, /*online*/
+    MODULE_TRIGGER=2,
+    MODULE_SPJ,
+    MODULE_CONNECT=4,
+    MODULE_AUDIT, /*security*/
+    MODULE_MAC=6,
+    MODULE_AUTH, /*local*/
+    MODULE_CACHE=8, /*little table*/
+    MODULE_HIVE,
+    MODULE_TENANT=10,
+    MODULE_RESTORE,
+    MODULE_BINLOG=12,
+    MODULE_LOB,
+    MODULE_MAX=14,
+};
+
+enum{
+    kSUCCESS,
+    kFAILURE,
+};
+enum{
+    MODULEOP_TEST,
+    MODULEOP_ENABLE,
+    MODULEOP_DISABLE,
+};
+
 struct __packed license{
     i16 ver;
     i8 name[FIELDLEN_NAME];
@@ -82,10 +111,26 @@ struct __packed license{
     i16 feature;
     i32 product;
     union __packed{
-        i8 rsv2[FIELDLEN_RSV2];
+        u8 rsv2[FIELDLEN_RSV2];
         u32 modules[1];
     };
 };
+
+int license_module_op(struct license*o,int op,int module){
+    if(module<=MODULE_MIN||module>=MODULE_MAX)
+        return kFAILURE;
+    u8*p=&o->rsv2[module/8];
+    int x=1<<(module%8);
+    if(op==MODULEOP_TEST)
+        return *p&x?kSUCCESS:kFAILURE;
+    else if(op==MODULEOP_ENABLE)
+        *p|=x;
+    else if(op==MODULEOP_DISABLE)
+        *p&=~x;
+    else
+        return kFAILURE;
+    return kSUCCESS;
+}
 
 MAIN_EX(argc,argv){
 #define BUFLEN 256
@@ -100,7 +145,7 @@ MAIN_EX(argc,argv){
     char buf[BUFLEN];
     int nr;
     nr=(int)read(fd,buf,sizeof buf);
-    struct st_unpacker_t u;
+    struct unpacker u;
     unpacker_init(&u,buf,buf+nr);
 #define UNPACK(x) u.unpack(&u,&li.x,sizeof(li.x))
     if(UNPACK(ver)
@@ -138,9 +183,14 @@ MAIN_EX(argc,argv){
                 );
     }
     LOGINFO("sizeof(struct license)=%ld",sizeof(struct license));
+#if 0 /*never expire is a risk*/
     if(li.expire==NEVEREXPIRE)
         return 0;
     li.expire=NEVEREXPIRE;
+#endif
+#ifdef DISABLE_HIVE
+    license_module_op(&li,MODULEOP_DISABLE,MODULE_HIVE);
+#endif
     char buf2[BUFLEN];
     int n=(int)sizeof(li);
     bytearray_encrypt((u8*)buf2,(u8*)&li,n,argv[2]);
